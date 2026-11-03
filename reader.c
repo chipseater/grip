@@ -4,6 +4,9 @@
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
+#include "mem_utils.h"
+
+#define BUFFER_INIT_CAPA 4096
 
 struct Reader {
   int length;
@@ -17,42 +20,48 @@ typedef struct Reader reader;
 
 reader* init_reader(char* filename) {
   reader* new_reader = malloc(sizeof(reader));
-  if (new_reader == NULL) {
-    perror("Allocation error");
-    exit(1);
-  }
+  NULL_BUFFER_HANDLING(new_reader);
   new_reader->length = 0;
-  new_reader->capacity = 16;
+  new_reader->capacity = BUFFER_INIT_CAPA;
   new_reader->filename = filename;
-  new_reader->file = open(filename, O_RDONLY, "r");
+  new_reader->file = open(filename, O_RDONLY, "rb");
   if (new_reader->file < 0) {
     fprintf(stderr, "%s: %s\n", filename, strerror(errno));
-    exit(1);
+    exit(4);
   }
   char* new_buffer = malloc(new_reader->capacity * sizeof(char));
-  if (new_buffer == NULL) {
-    perror("Allocation error");
-    exit(1);
-  }
+  NULL_BUFFER_HANDLING(new_buffer);
+  new_reader->buffer = new_buffer;
+  return new_reader;
+}
+
+reader* init_reader_stdin() {
+  reader* new_reader = malloc(sizeof(reader));
+  NULL_BUFFER_HANDLING(new_reader);
+  new_reader->length = 0;
+  new_reader->capacity = BUFFER_INIT_CAPA;
+  new_reader->filename = NULL;
+  new_reader->file = STDIN_FILENO;
+  char* new_buffer = malloc(new_reader->capacity * sizeof(char));
+  NULL_BUFFER_HANDLING(new_buffer);
   new_reader->buffer = new_buffer;
   return new_reader;
 }
 
 void resize_buffer(reader* r) {
   r->capacity *= 2;
-  char* new_buffer = malloc(r->capacity);
-  memcpy(new_buffer, r->buffer, r->capacity);
-  r->buffer = new_buffer;
+  char* status = realloc(r->buffer, r->capacity * sizeof(char));
+  NULL_BUFFER_HANDLING(status);
 }
 
 void read_file(reader* r) {
   int count = read(r->file, r->buffer, r->capacity);
-  int offset = 0;
-  while (count == r->capacity) {
-    offset += count;
+  while (r->length >= r->capacity) {
     resize_buffer(r);
-    count = read(r->file, r->buffer+offset, r->capacity);
+    r->length += count;
+    count = read(r->file, r->buffer + r->length, r->capacity);
   }
+  r->length += count;
 }
 
 void free_reader(reader* r) {

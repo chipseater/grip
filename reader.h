@@ -12,6 +12,7 @@ struct Reader {
 typedef struct Reader reader;
 
 reader* init_reader(char* pattern);
+reader* init_reader_stdin();
 void read_file(reader* r);
 void free_reader(reader* r);
 void resize_buffer(reader* r);

@@ -4,5 +4,8 @@ build:
 builddebug:
 	gcc -Wextra -Wall -g *.c -o grip
 
+buildasan:
+	gcc -Wextra -Wall -fsanitize=address *.c -o grip
+
 run:
-	./grip testfile pattern
+	echo "A needle in a haystack" | ./grip needle
