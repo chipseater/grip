@@ -60,7 +60,9 @@ int main(int argc, char** argv) {
                                               r->length,
                                               !validated_flags['i']);
   // print_intDynArray(occurences);
-  print_lines_from_indexes(occurences, pattern_length, r->buffer, r->length);
+  // printf("%d\n", occurences->length);
+  // print_lines_from_indexes(occurences, pattern_length, r->buffer, r->length);
+  printf("%s", r->buffer);
   free_intDynArray(occurences);
   free_reader(r);
   return 0;

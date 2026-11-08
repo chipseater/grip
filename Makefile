@@ -5,7 +5,7 @@ builddebug:
 	gcc -Wextra -Wall -g *.c -o grip
 
 buildasan:
-	gcc -Wextra -Wall -fsanitize=address *.c -o grip
+	gcc -Wextra -Wall -fsanitize=address,undefined *.c -o grip
 
 run:
 	echo "A needle in a haystack" | ./grip needle

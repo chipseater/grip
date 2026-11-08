@@ -50,18 +50,19 @@ reader* init_reader_stdin() {
 
 void resize_buffer(reader* r) {
   r->capacity *= 2;
-  char* status = realloc(r->buffer, r->capacity * sizeof(char));
-  NULL_BUFFER_HANDLING(status);
+  char* reallocated = realloc(r->buffer, r->capacity * sizeof(char));
+  NULL_BUFFER_HANDLING(reallocated);
+  r->buffer = reallocated;
 }
 
 void read_file(reader* r) {
   int count = read(r->file, r->buffer, r->capacity);
-  while (r->length >= r->capacity) {
-    resize_buffer(r);
-    r->length += count;
-    count = read(r->file, r->buffer + r->length, r->capacity);
+  if (count > 0) r->length += count;
+  while (count > 0) {
+    if (r->length >= r->capacity) resize_buffer(r);
+    count = read(r->file, r->buffer + r->length, r->capacity - r->length);
+    if (count > 0) r->length += count;
   }
-  r->length += count;
 }
 
 void free_reader(reader* r) {
