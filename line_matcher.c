@@ -8,13 +8,13 @@
 #define ANSI_RESET "\x1b[0m"
 
 
-struct MatchLine {
+typedef struct matchSpan {
   int begin;
   int end;
-};
+} matchspan;
 
-// It returns the line that contains the index-th character of text
-struct MatchLine* reverse_line_matcher(int index, char* text, int text_len, int* prev_begin) {
+// It returns the line that contains the index-th character of text, if already found NULL
+matchspan* reverse_line_matcher(int index, char* text, int text_len, int* prev_begin) {
   int line_begin = index;
   int line_end = index;
   while (line_begin > 0 && text[line_begin - 1] != '\n') line_begin--;
@@ -22,7 +22,7 @@ struct MatchLine* reverse_line_matcher(int index, char* text, int text_len, int*
   // Returns NULL if the previous match is on the same line as the current one
   if (*prev_begin == line_begin) return NULL;
   *prev_begin = line_begin;
-  struct MatchLine* match = malloc(sizeof(*match));
+  matchspan* match = malloc(sizeof(*match));
   NULL_BUFFER_HANDLING(match);
   match->begin = line_begin;
   match->end = line_end;
@@ -40,13 +40,11 @@ void color_text(char* output_buffer, int output_len, char* text,
   printf("After: %s", output_buffer);
 }
 
-void print_lines_from_indexes(intDynArray* indexes,
-                              int pattern_len, char* text, int text_len) {
+intDynArray* make_match_begin_arr(intDynArray* indexes, char* text, int text_len) {
   int prev_begin = -1;
+  intDynArray* match_begin_arr = new_intDynArray();
   for (int i = 0; i < indexes->length; i++) {
-    int begin_index = indexes->buffer[i];
-    struct MatchLine* match = reverse_line_matcher(begin_index, text, text_len, &prev_begin);
-    if (!match) return;
-    printf("%.*s\n", match->end - match->begin, text + match->begin);
+    matchspan* match_line = reverse_line_matcher(indexes[i], text, text_len, &prev_begin);
+    if (match_line != NULL) push_to_dynarray(match_line->begin);
   }
 }

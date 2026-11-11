@@ -9,3 +9,6 @@ buildasan:
 
 run:
 	echo "A needle in a haystack" | ./grip needle
+
+runlarge:
+	cat /etc/services | ./grip e
