@@ -10,10 +10,11 @@ typedef struct Vector {
 } vector;
 
 vector* vect_new(size_t item_size);
-void vect_resize(vector* arr);
-uint8_t* get_target_address(vector* arr, size_t index);
-uint8_t vect_get(vector* arr, size_t i);
+void vect_get(vector* arr, size_t i, void* recipient);
 void vect_print(vector* arr, void print_fn(uint8_t), char sep);
 void vect_free_with_items(vector* arr, void item_free(void*));
 void vect_free(vector* arr);
+
+#define vect_create(type) vect_new(sizeof(type))
+
 #endif
