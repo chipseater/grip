@@ -1,20 +1,19 @@
-#ifndef PTR_DYNARRAY
-#define PTR_DYNARRAY
+#ifndef VECTOR
+#define VECTOR
 #include <stdint.h>
 
 typedef struct Vector {
   uint8_t* items;
   size_t item_size;
-  size_t length;
   size_t capacity;
+  size_t length;
 } vector;
 
-vector* new_vector(size_t item_size);
-void resize_vector(vector* arr);
-void push_to_vector(vector* arr, void* element);
-void print_vector(const vector* arr, void print_fn(const void*), char sep);
-void free_vector_with_items(vector* arr, void item_free(void*));
-void free_vector(vector* arr);
-
-#define vector_init(TYPE) new_vector(sizeof((TYPE)))
+vector* vect_new(size_t item_size);
+void vect_resize(vector* arr);
+uint8_t* get_target_address(vector* arr, size_t index);
+uint8_t vect_get(vector* arr, size_t i);
+void vect_print(vector* arr, void print_fn(uint8_t), char sep);
+void vect_free_with_items(vector* arr, void item_free(void*));
+void vect_free(vector* arr);
 #endif
