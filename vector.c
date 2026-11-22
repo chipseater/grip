@@ -5,18 +5,18 @@
 #include "vector.h"
 #include "mem_utils.h"
 
-vector* vect_new(size_t item_size) {
+vector* _vect_new(size_t item_size) {
   vector* new_dynarray = malloc(sizeof(vector));
   NULL_BUFFER_HANDLING(new_dynarray);
   new_dynarray->length = 0;
-  new_dynarray->capacity = 256;
+  new_dynarray->capacity = 8;
   new_dynarray->item_size = item_size;
   new_dynarray->items = malloc(new_dynarray->capacity * item_size);
   NULL_BUFFER_HANDLING(new_dynarray->items);
   return new_dynarray;
 }
 
-void vect_resize(vector* arr) {
+static void vect_resize(vector* arr) {
   if (arr->capacity > 0) {
     arr->capacity *= 2;
   } else {
@@ -27,11 +27,11 @@ void vect_resize(vector* arr) {
   arr->items = reallocated;
 }
 
-uint8_t* get_target_address(vector* arr, size_t index) {
+static uint8_t* get_target_address(vector* arr, size_t index) {
   return arr->items + arr->item_size * index;
 }
 
-void vect_get(vector* arr, size_t i, void* recipient) {
+void _vect_at(vector* arr, size_t i, void* recipient) {
   memcpy(recipient, get_target_address(arr, i), arr->item_size);
 }
 
@@ -39,26 +39,12 @@ void vect_set(vector* arr, size_t i, void* element) {
   memcpy(get_target_address(arr, i), element, arr->item_size);
 }
 
-void vect_push(vector* arr, void* element) {
+void _vect_push(vector* arr, void* element) {
   if (arr->capacity <= arr->length)
     vect_resize(arr);
   vect_set(arr, arr->length, element);
   arr->length++;
 }
-
-/* TODO: Turn this into a macro
- * void vect_print(vector* arr, void print_fn(uint8_t), char sep) {
-  if (arr->length == 0) {
-    printf("∅\n");
-    return;
-  }
-  print_fn(vect_get(arr, 0));
-  for (size_t i = 1; i < arr->length; i++) {
-    printf("%c", sep);
-    print_fn(vect_get(arr, i));
-  }
-  printf("\n");
-} */
 
 void vect_free_with_items(vector* arr, void item_free(void*)) {
   if (!arr) return;
@@ -75,15 +61,20 @@ void vect_free(vector* arr) {
   vect_free_with_items(arr, NULL);
 }
 
-#define T char*
+void print_int(int i) {
+  printf("%d", i);
+}
+
+#define T int
 
 int main(void) {
-  vector* arr = vect_new(sizeof(T));
-  T el = "abcdefg";
-  vect_push(arr, (void*)(&el));
-  T recipient[arr->item_size];
-  vect_get(arr, 0, recipient);
-  printf("%s\n", *recipient);
+  vector* arr = vect_new(T);
+  vect_push(T, arr, 1);
+  vect_push(T, arr, 2);
+  vect_push(T, arr, 3);
+  vect_push(T, arr, 4);
+  vect_push(T, arr, 5);
+  vect_print(T, arr, print_int, "");
   vect_free(arr);
   return 0;
 }
