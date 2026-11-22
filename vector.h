@@ -13,6 +13,10 @@ typedef struct Vector {
 } vector;
 
 vector* _vect_new(size_t item_size);
+vector* _vect_new_with_capa(size_t item_size, size_t capa);
+vector* string_to_vect(char* string);
+void _vect_to_string(vector* vect, char* recipient);
+void vect_resize(vector* arr);
 void _vect_at(vector* arr, size_t i, void* recipient);
 void _vect_push(vector* arr, void* element);
 void vect_set(vector* arr, size_t i, void* element);
@@ -20,12 +24,13 @@ void vect_free_with_items(vector* arr, void item_free(void*));
 void vect_free(vector* arr);
 
 #define vect_new(type) _vect_new(sizeof(type))
+#define vect_new_with_capa(type, capa) _vect_new_with_capa(sizeof(type), capa)
 
 #define vect_at(type, arr, i) ({ \
   size_t _i = i; \
-  assert(_i < arr->length); \
+  assert(_i < (arr)->length); \
   type _recipient; \
-  _vect_at(arr, _i, &_recipient); \
+  _vect_at((arr), _i, &_recipient); \
   _recipient; \
 })
 

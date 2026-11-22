@@ -3,9 +3,10 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include "reader.h"
+#include "sv.h"
+/*
 #include "string.h"
 #include "bmh.h"
-#include "dynarray.h"
 #include "line_matcher.h"
 
 char valid_flags[6] = "aeiou";
@@ -63,3 +64,19 @@ int main(int argc, char** argv) {
   free_reader(r);
   return 0;
 }
+*/
+
+void print_char(char c) {
+  printf("%c", c);
+}
+
+int main(void) {
+  reader* reader = init_reader("sv.c");
+  vector* file_buf_vect = read_file(reader);
+  vect_print(char, file_buf_vect, print_char, "");
+  sv* sv_line = sv_capture_line(file_buf_vect, 50);
+  sv_print(sv_line);
+  free_reader(reader);
+  return 0;
+}
+

@@ -1,19 +1,10 @@
 #ifndef READER
 #define READER
-
-struct Reader {
-  int length;
-  int capacity;
-  char* filename;
-  char* buffer;
-  int file;
-};
+#include "vector.h"
 
 typedef struct Reader reader;
 
-reader* init_reader(char* pattern);
-reader* init_reader_stdin();
-void read_file(reader* r);
+reader* init_reader(char* filename);
+vector* read_file(reader* r);
 void free_reader(reader* r);
-void resize_buffer(reader* r);
 #endif

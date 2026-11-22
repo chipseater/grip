@@ -4,69 +4,52 @@
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
+#include "vector.h"
 #include "mem_utils.h"
-
-#define BUFFER_INIT_CAPA 4096
+#include "reader.h"
 
 struct Reader {
-  int length;
-  int capacity;
-  char* filename;
-  char* buffer;
+  vector* file_buf;
   int file;
 };
 
 typedef struct Reader reader;
 
+// if filename is NULL, read standard input
 reader* init_reader(char* filename) {
   reader* new_reader = malloc(sizeof(reader));
   NULL_BUFFER_HANDLING(new_reader);
-  new_reader->length = 0;
-  new_reader->capacity = BUFFER_INIT_CAPA;
-  new_reader->filename = filename;
+  new_reader->file_buf = vect_new_with_capa(char, 4096);
+  if (filename == NULL) {
+    new_reader->file = STDIN_FILENO;
+    return new_reader;
+  }
   new_reader->file = open(filename, O_RDONLY, "rb");
   if (new_reader->file < 0) {
     fprintf(stderr, "%s: %s\n", filename, strerror(errno));
     exit(4);
   }
-  char* new_buffer = malloc(new_reader->capacity * sizeof(char));
-  NULL_BUFFER_HANDLING(new_buffer);
-  new_reader->buffer = new_buffer;
   return new_reader;
 }
 
-reader* init_reader_stdin() {
-  reader* new_reader = malloc(sizeof(reader));
-  NULL_BUFFER_HANDLING(new_reader);
-  new_reader->length = 0;
-  new_reader->capacity = BUFFER_INIT_CAPA;
-  new_reader->filename = NULL;
-  new_reader->file = STDIN_FILENO;
-  char* new_buffer = malloc(new_reader->capacity * sizeof(char));
-  NULL_BUFFER_HANDLING(new_buffer);
-  new_reader->buffer = new_buffer;
-  return new_reader;
-}
-
-void resize_buffer(reader* r) {
-  r->capacity *= 2;
-  char* reallocated = realloc(r->buffer, r->capacity * sizeof(char));
-  NULL_BUFFER_HANDLING(reallocated);
-  r->buffer = reallocated;
-}
-
-void read_file(reader* r) {
-  int count = read(r->file, r->buffer, r->capacity);
-  if (count > 0) r->length += count;
+vector* read_file(reader* r) {
+  int count = read(r->file,
+                   (char*)r->file_buf->items,
+                   r->file_buf->capacity);
+  if (count > 0) r->file_buf->length += count;
   while (count > 0) {
-    if (r->length >= r->capacity) resize_buffer(r);
-    count = read(r->file, r->buffer + r->length, r->capacity - r->length);
-    if (count > 0) r->length += count;
+    if (r->file_buf->length >= r->file_buf->capacity)
+      vect_resize(r->file_buf);
+    count = read(r->file,
+                 r->file_buf->items + r->file_buf->length,
+                 r->file_buf->capacity - r->file_buf->length);
+    if (count > 0) r->file_buf->length += count;
   }
+  return r->file_buf;
 }
 
 void free_reader(reader* r) {
-  free(r->buffer);
+  vect_free(r->file_buf);
   close(r->file);
   free(r);
 }

@@ -1,11 +1,13 @@
+SRC = main.c vector.c reader.c
+
 build:
-	gcc -Wextra -Wall *.c -o grip
+	gcc -Wextra -Wall ${SRC} -o grip
 
 builddebug:
-	gcc -Wextra -Wall -g *.c -o grip
+	gcc -Wextra -Wall -g  ${SRC} -o grip
 
 buildasan:
-	gcc -Wextra -Wall -fsanitize=address,undefined *.c -o grip
+	gcc -Wextra -Wall -fsanitize=address,undefined ${SRC} -o grip
 
 run:
 	echo "A needle in a haystack" | ./grip needle
