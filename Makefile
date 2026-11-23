@@ -1,4 +1,4 @@
-SRC = main.c vector.c reader.c
+SRC = main.c vector.c reader.c sv.c bmh.c
 
 build:
 	gcc -Wextra -Wall ${SRC} -o grip

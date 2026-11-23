@@ -73,9 +73,8 @@ void print_char(char c) {
 int main(void) {
   reader* reader = init_reader("sv.c");
   vector* file_buf_vect = read_file(reader);
-  vect_print(char, file_buf_vect, print_char, "");
-  sv* sv_line = sv_capture_line(file_buf_vect, 50);
-  sv_print(sv_line);
+  char skip_table[256];
+  find_pattern_bmh_offsets(skip_table);
   free_reader(reader);
   return 0;
 }
